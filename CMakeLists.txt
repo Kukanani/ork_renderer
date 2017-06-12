@@ -1,40 +1,110 @@
-cmake_minimum_required(VERSION 2.8.0)
-project(object_recognition_renderer)
+cmake_minimum_required(VERSION 3.5)
+project(ork_renderer)
 
+find_package(ament_cmake REQUIRED)
 find_package(Boost REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(ASSIMP REQUIRED)
 
-find_package(catkin REQUIRED)
+find_package(GLUT REQUIRED)
+add_definitions(-DUSE_RENDERER_GLUT=1)
 
-option(USE_GLUT "Use GLUT instead of OSMesa" OFF)
-
-if (${USE_GLUT})
-find_package(GLUT)
-set(${PROJECT_NAME}_depends GLUT)
-endif()
-
-catkin_package(INCLUDE_DIRS include
-               DEPENDS Boost ${${PROJECT_NAME}_depends}
-               LIBRARIES ${PROJECT_NAME}_2d ${PROJECT_NAME}_3d
-)
-
+################################################################################
 include_directories(include)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS}
-                           ${catkin_INCLUDE_DIRS}
-                           ${OpenCV_INCLUDE_DIRS}
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+                    ${ASSIMP_INCLUDE_DIRS}
+                    ${OPENGL_INCLUDE_DIR}
+                    ${Boost_INCLUDE_DIRS}
+                    ${OpenCV_INCLUDE_DIRS}
+                    ${GLUT_INCLUDE_DIR}
+)
+link_directories(${ASSIMP_LIBRARY_DIRS})
+
+################################################################################
+add_library(${PROJECT_NAME}_2d SHARED
+  src/renderer2d.cpp
+)
+ament_target_dependencies(${PROJECT_NAME}_2d
+  "OpenCV"
+)
+install(
+  TARGETS ${PROJECT_NAME}_2d
+  DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
-add_subdirectory(src)
-
-# install the include folder
-install(FILES ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/renderer.h
-              ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/renderer2d.h
-              ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/renderer3d.h
-              ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/utils.h
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/
+################################################################################
+add_library(${PROJECT_NAME}_3d SHARED
+  src/model.cpp
+  src/renderer3d.cpp
+  src/utils.cpp
+  src/renderer3d_impl_glut.cpp
+)
+ament_target_dependencies(${PROJECT_NAME}_3d
+   GLUT freeimage ASSIMP
+)
+target_link_libraries(${PROJECT_NAME}_3d
+  freeimage
+  ${OPENGL_LIBRARIES}
+)
+install(
+  TARGETS ${PROJECT_NAME}_3d
+  DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
-# add docs
-if (COMMAND ecto_sphinx)
-ecto_sphinx(${CMAKE_CURRENT_SOURCE_DIR}/doc/ doc)
-endif()
+################################################################################
+add_executable(view_generator
+  src/main.cpp
+)
+ament_target_dependencies(view_generator
+  OPENGL
+  GLUT
+  OpenCV
+  ASSIMP
+  freeimage
+)
+target_link_libraries(view_generator
+  ${PROJECT_NAME}_2d
+  ${PROJECT_NAME}_3d
+  freeimage
+  ${OPENGL_LIBRARIES}
+)
+# set_property(
+#   TARGET view_generator
+#   PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX}
+# )
+install(
+  TARGETS view_generator
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+
+################################################################################
+add_executable(trainer_planar
+  src/apps/trainer_planar.cpp
+)
+# set_property(
+#   TARGET trainer_planar
+#   PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX}
+# )
+target_link_libraries(trainer_planar ${PROJECT_NAME}_2d)
+set_target_properties(trainer_planar PROPERTIES
+                                     OUTPUT_NAME trainer_planar
+)
+install(TARGETS trainer_planar
+        DESTINATION lib RUNTIME DESTINATION bin
+)
+
+
+################################################################################
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+ament_export_libraries(${PROJECT_NAME}_3d)
+ament_export_include_directories(include)
+ament_package()

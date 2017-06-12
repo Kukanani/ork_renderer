@@ -43,9 +43,9 @@
 
 #include <opencv2/highgui/highgui.hpp>
 
-#include <object_recognition_renderer/renderer3d.h>
-#include <object_recognition_renderer/utils.h>
-#include <object_recognition_renderer/renderer2d.h>
+#include <ork_renderer/renderer3d.h>
+#include <ork_renderer/utils.h>
+#include <ork_renderer/renderer2d.h>
 
 void render3d(std::string file_name, size_t width, size_t height) {
   Renderer3d renderer = Renderer3d(file_name);

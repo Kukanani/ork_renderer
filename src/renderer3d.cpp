@@ -33,7 +33,7 @@
  *
  */
 
-#include <object_recognition_renderer/renderer3d.h>
+#include <ork_renderer/renderer3d.h>
 
 #include <iostream>
 #include <stdlib.h>

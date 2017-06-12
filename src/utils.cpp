@@ -34,8 +34,8 @@
  *
  */
 
-#include <object_recognition_renderer/renderer.h>
-#include <object_recognition_renderer/utils.h>
+#include <ork_renderer/renderer.h>
+#include <ork_renderer/utils.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -43,8 +43,8 @@
 #include <opencv2/objdetect/objdetect.hpp>
 #endif
 
-#include <object_recognition_renderer/utils.h>
-#include <object_recognition_renderer/renderer2d.h>
+#include <ork_renderer/utils.h>
+#include <ork_renderer/renderer2d.h>
 
 void drawResponse(const std::vector<cv::linemod::Template>& templates, int num_modalities, cv::Mat& dst,
     cv::Point offset, int T) {
