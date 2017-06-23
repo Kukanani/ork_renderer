@@ -6,9 +6,9 @@ find_package(Boost REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(ASSIMP REQUIRED)
+find_package(SDL REQUIRED)
 
 find_package(GLUT REQUIRED)
-add_definitions(-DUSE_RENDERER_GLUT=1)
 
 ################################################################################
 include_directories(include)
